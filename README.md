@@ -2,7 +2,7 @@
 
 > State management that is so dumb, it makes me say "w0w" with a zero because "wow" is already taken on npm.
 
-`w0w` is inspired by [`PureState`](https://github.com/MaiaVictor/PureState), which claims to be "the stupidest state management library that works". `PureState` is awesomely stupid and works, but it is not immediately obvious how some edge cases will behave and its `state` function does too much for dummies like me. `w0w` has two extra-stupidest functions `state` and `computed` instead of the one `state` function that does both.
+`w0w` is inspired by [`PureState`](https://github.com/MaiaVictor/PureState), which claims to be "the stupidest state management library that works". `PureState` is awesomely stupid and works, but it is not immediately obvious how some edge cases will behave and its `state` function does too much for dummies like me. `w0w` has two extra-stupidest functions, `state` and `computed`, instead of the one `state` function that does both.
 
 ## install
 
