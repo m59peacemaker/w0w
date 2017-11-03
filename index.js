@@ -1,55 +1,71 @@
+const identity = v => v
+const notUndefined = v => v !== undefined
+const isTrue = v => v === true
+
 let capturedDependencies
 let capturingDependencies = false
 
-const captureDependencies = fn => {
+const captureDependencies = () => {
   capturedDependencies = new Set()
   capturingDependencies = true
-  const result = fn()
-  capturingDependencies = false
-  return { result, dependencies: capturedDependencies }
+  return () => {
+    capturingDependencies = false
+    return capturedDependencies
+  }
 }
-
-const captureIfCapturing = (stateNode) =>
-  capturingDependencies && capturedDependencies.add(stateNode)
 
 const registerAsDependant = (dependencies, node) =>
   dependencies.forEach(dependency => dependency.dependants.add(node))
 
 const notifyDependants = node => node.dependants.forEach(dependant => dependant(true))
 
-const state = initialValue => {
-  let currentValue = initialValue
-
-  const stateNode = (newValue) => {
-    captureIfCapturing(stateNode)
-
-    if (newValue !== undefined) {
-      currentValue = newValue
-      notifyDependants(stateNode)
+const Node = (
+  getInitialValue,
+  getNextValue,
+  checkShouldUpdate,
+  updateDepErrMsg
+) => {
+  const node = value => {
+    const shouldUpdate = checkShouldUpdate(value)
+    if (capturingDependencies) {
+      if (shouldUpdate) {
+        throw new Error(updateDepErrMsg)
+      }
+      capturedDependencies.add(node)
     }
 
-    return currentValue
+    if (shouldUpdate) {
+      node.value = getNextValue(value)
+      notifyDependants(node)
+    }
+
+    return node.value
   }
 
-  stateNode.dependants = new Set()
-
-  return stateNode
+  return Object.assign(node, {
+    value: getInitialValue(),
+    dependants: new Set()
+  })
 }
 
+const state = initialValue => Node(
+  () => initialValue,
+  identity,
+  notUndefined,
+  'attempted to set the value of a stateNode within a compute function'
+)
+
 const computed = computeFn => {
-  const { result, dependencies } = captureDependencies(computeFn)
-  let currentValue = result
+  const doneCapturing = captureDependencies()
 
-  const computedNode = shouldRecompute => {
-    captureIfCapturing(computedNode)
-    if (shouldRecompute === true) {
-      currentValue = computeFn()
-      notifyDependants(computedNode)
-    }
-    return currentValue
-  }
+  const computedNode = Node(
+    computeFn,
+    computeFn,
+    isTrue,
+    'attempted to force a computedNode to recompute from within a compute function'
+  )
 
-  computedNode.dependants = new Set()
+  const dependencies = doneCapturing()
 
   registerAsDependant(dependencies, computedNode)
 
