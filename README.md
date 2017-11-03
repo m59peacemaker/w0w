@@ -40,7 +40,7 @@ const stateNode = state(10)
 
 Creates and returns a `stateNode`
 
-#### `stateNode(newValue), stateNode()`
+#### `stateNode(newValue)`, `stateNode()`
 
 If passed a value that isn't `undefined`, the `stateNode` will be updated with that value and `computedNodes` that depend on it will recompute.
 
