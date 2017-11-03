@@ -91,6 +91,20 @@ test('computedNode(true) causes triggers recompute', t => {
   t.end()
 })
 
+test('can access stateNode repeatedly in computeFn', t => {
+  const y = state('y')
+  let timesComputed = 0
+  const yy = computed(() => {
+    ++timesComputed
+    return y() + y()
+  })
+  t.equal(yy(), 'yy')
+  y('Y')
+  t.equal(yy(), 'YY')
+  t.equal(timesComputed, 2)
+  t.end()
+})
+
 test('computed value with branching/ternary, computed value is stale after updating y() if y() is in a branch not executed on first computation', t => {
   const x = state(1)
   const y = state(2)
