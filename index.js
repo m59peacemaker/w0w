@@ -22,21 +22,16 @@ const notifyDependants = node => node.dependants.forEach(dependant => dependant(
 const Node = (
   getInitialValue,
   getNextValue,
-  checkShouldUpdate,
-  updateDepErrMsg
+  checkShouldUpdate
 ) => {
   const node = value => {
     const shouldUpdate = checkShouldUpdate(value)
-    if (capturingDependencies) {
-      if (shouldUpdate) {
-        throw new Error(updateDepErrMsg)
-      }
-      capturedDependencies.add(node)
-    }
 
     if (shouldUpdate) {
       node.value = getNextValue(value)
       notifyDependants(node)
+    } else if (capturingDependencies) {
+      capturedDependencies.add(node)
     }
 
     return node.value
@@ -51,8 +46,7 @@ const Node = (
 const state = initialValue => Node(
   () => initialValue,
   identity,
-  notUndefined,
-  'attempted to set the value of a stateNode within a compute function'
+  notUndefined
 )
 
 const computed = computeFn => {
@@ -61,8 +55,7 @@ const computed = computeFn => {
   const computedNode = Node(
     computeFn,
     computeFn,
-    isTrue,
-    'attempted to force a computedNode to recompute from within a compute function'
+    isTrue
   )
 
   const dependencies = doneCapturing()

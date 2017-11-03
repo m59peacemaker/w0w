@@ -115,14 +115,16 @@ test('accessing values used in branches in default parameters solves the branchi
   t.end()
 })
 
-// TODO: what happens when a computeFn passes a new value to a stateNode?
-// infinite loop? is that the right thing? or can there be some other behavior that is useful
-// and/or does not suck?
-test.skip('computeFn passes a new value to a stateNode - should do wat?', t => {
+test('computeFn passes a new value to a stateNode and does not become a dependency of it, causing an infinite loop', t => {
   const x = state(0)
-  const computedNode = computed(() => x(5) + 1)
+  const computedNode = computed(() => {
+    t.equal(t.assertCount, 0, 'computeFn should only have run once, otherwise computeFn must have become a dependency of the stateNode it sets')
+    return x(5) + 1
+  })
   x(20)
-  t.equal(computedNode(), 5)
+  x(97)
+  x(26)
+  t.equal(computedNode(), 6)
   t.end()
 })
 
