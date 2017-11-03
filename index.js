@@ -14,10 +14,11 @@ const captureDependencies = () => {
   }
 }
 
-const registerAsDependant = (dependencies, node) =>
-  dependencies.forEach(dependency => dependency.dependants.add(node))
+const registerAsDependant = (dependencies, dependantNode) =>
+  dependencies.forEach(node => (node.dependants = node.dependants || new Set()).add(dependantNode))
 
-const notifyDependants = node => node.dependants.forEach(dependant => dependant(true))
+const notifyDependants = node =>
+  node.dependants && node.dependants.forEach(dependant => dependant(true))
 
 const Node = (
   getInitialValue,
@@ -37,10 +38,9 @@ const Node = (
     return node.value
   }
 
-  return Object.assign(node, {
-    value: getInitialValue(),
-    dependants: new Set()
-  })
+  node.value = getInitialValue()
+
+  return node
 }
 
 const state = initialValue => Node(
